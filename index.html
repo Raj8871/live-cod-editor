@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Code Editor</title>
+  
+  <!-- Add Prism.js for syntax highlighting -->
+  <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+      color: #333;
+    }
+    header {
+      background: #282c34;
+      color: white;
+      padding: 10px 20px;
+      text-align: center;
+      font-size: 24px;
+    }
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 20px;
+    }
+    .editor {
+      flex: 1;
+      min-width: 300px;
+      background: #333;
+      color: white;
+      padding: 15px;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    .editor textarea {
+      width: 100%;
+      height: 200px;
+      background: #2c2f36;
+      color: #fff;
+      border: none;
+      padding: 10px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 14px;
+      border-radius: 5px;
+      resize: none;
+      outline: none;
+    }
+    #preview {
+      flex: 2;
+      min-width: 600px;
+      background: #fff;
+      border-radius: 5px;
+      padding: 15px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+    .btn-toggle {
+      background-color: #282c34;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 10px;
+      font-size: 14px;
+    }
+    .instructions {
+      margin-top: 20px;
+      background: #333;
+      color: #fff;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    .instructions p {
+      margin: 0;
+      font-size: 14px;
+    }
+    .split-layout .container {
+      flex-wrap: nowrap;
+      justify-content: space-between;
+    }
+    .split-layout .editor, .split-layout #preview {
+      min-width: 45%;
+    }
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      .split-layout .container {
+        flex-direction: column;
+      }
+      .split-layout .editor, .split-layout #preview {
+        min-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>Live Code Editor</header>
+
+<div class="container">
+  <div class="editor">
+    <h3>HTML</h3>
+    <textarea id="html-code" class="code-input" placeholder="Write your HTML code here..."></textarea>
+  </div>
+  
+  <div class="editor">
+    <h3>CSS</h3>
+    <textarea id="css-code" class="code-input" placeholder="Write your CSS code here..."></textarea>
+  </div>
+  
+  <div class="editor">
+    <h3>JavaScript</h3>
+    <textarea id="js-code" class="code-input" placeholder="Write your JavaScript code here..."></textarea>
+  </div>
+  
+  <div id="preview">
+    <h3>Live Preview</h3>
+    <iframe id="live-preview" style="width:100%; height:500px; border:none;"></iframe>
+  </div>
+</div>
+
+<div class="instructions" id="instructions">
+  <p>Start writing code to see instructions here!</p>
+</div>
+
+<button class="btn-toggle" onclick="toggleLayout()">Toggle Layout</button>
+
+<script>
+  const htmlCode = document.getElementById('html-code');
+  const cssCode = document.getElementById('css-code');
+  const jsCode = document.getElementById('js-code');
+  const livePreview = document.getElementById('live-preview');
+  const instructions = document.getElementById('instructions');
+  const container = document.querySelector('.container');
+
+  function updatePreview() {
+    const html = htmlCode.value;
+    const css = `<style>${cssCode.value}</style>`;
+    const js = `<script>${jsCode.value}<\/script>`;
+    livePreview.srcdoc = html + css + js;
+    highlightCode(); // Highlight code on every input change
+  }
+
+  function provideInstructions() {
+    let instructionsText = '<p>Write your code in HTML, CSS, and JavaScript sections.</p>';
+    
+    if (cssCode.value.includes('color')) {
+      instructionsText += '<p><strong>Tip:</strong> You are styling the colors in CSS! Experiment with background-color, color, etc.</p>';
+    }
+    
+    if (jsCode.value.includes('alert')) {
+      instructionsText += '<p><strong>Tip:</strong> You are using JavaScript to show an alert!</p>';
+    }
+    
+    instructions.innerHTML = instructionsText;
+  }
+
+  function highlightCode() {
+    Prism.highlightAll();
+  }
+
+  htmlCode.addEventListener('input', () => {
+    updatePreview();
+    provideInstructions();
+  });
+  cssCode.addEventListener('input', () => {
+    updatePreview();
+    provideInstructions();
+  });
+  jsCode.addEventListener('input', () => {
+    updatePreview();
+    provideInstructions();
+  });
+
+  function toggleLayout() {
+    container.classList.toggle('split-layout');
+  }
+  (function () {
+  "use strict";
+
+  // Prevent XSS Attacks by sanitizing user inputs
+  function sanitizeInput(input) {
+    const tempDiv = document.createElement("div");
+    tempDiv.textContent = input;
+    return tempDiv.innerHTML;
+  }
+
+  // Example: Sanitize all input fields automatically
+  const inputs = document.querySelectorAll("input, textarea");
+  inputs.forEach(input => {
+    input.addEventListener("input", (e) => {
+      e.target.value = sanitizeInput(e.target.value);
+    });
+  });
+
+  // Disable right-click to prevent unauthorized access
+  document.addEventListener("contextmenu", (e) => {
+    e.preventDefault();
+    console.warn("Right-click is disabled to enhance security.");
+  });
+
+  // Prevent debugging tools (like F12/DevTools)
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "F12" || (e.ctrlKey && e.shiftKey && e.key === "I")) {
+      e.preventDefault();
+      console.warn("Developer tools are disabled.");
+    }
+  });
+
+  // Monitor DOM changes for suspicious activity
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.addedNodes.length > 0) {
+        mutation.addedNodes.forEach(node => {
+          if (node.nodeType === 1 && node.tagName === "SCRIPT") {
+            console.error("Unauthorized script detected and removed!");
+            node.remove();
+          }
+        });
+      }
+    });
+  });
+
+  observer.observe(document.body, { childList: true, subtree: true });
+
+  // Secure cookies
+  document.cookie = "SecureCookie=SecureValue; Secure; HttpOnly; SameSite=Strict";
+
+  console.log("Basic security measures are active on this website.");
+})();
+
+</script>
+
+</body>
+</html>
